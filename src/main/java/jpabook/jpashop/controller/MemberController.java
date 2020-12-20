@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -46,5 +47,17 @@ public class MemberController {
 
         memberService.join(member);
         return "redirect:/";
+    }
+
+    // 화면에 맞는 api 들은 form 객체나 DTO 를 사용해야함. Entity 로 ahemsrp 1:1 로 매핑될 수 없다.
+    // Entity 는 최대한 순수하게 유지되어야 한다. // 핵심 비지니스 로직이 틀어지거나, 화면이 깨지거나 할 수 있다.
+    // 지금은 단순해서 Member entity 를 사용함.
+    // template 엔진인 서버안에서 렌더린되어서 괜찮은데, api 를 만들때는 이유를 불문하고 Entity 를 반환하면 안됨.
+    // 왜? - api 는 스펙이고 member entity 에 field 를 추가하게 되면 api 의 스펙이 변해버린다.
+    // 아래를 개선하자면 DTO 로 변환해서 전달해야한다.
+    @GetMapping("/members")
+    public String list(Model model){
+        model.addAttribute("members", memberService.findMembers());
+        return "members/memberList";
     }
 }
