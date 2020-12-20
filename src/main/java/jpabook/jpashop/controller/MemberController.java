@@ -19,6 +19,10 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    // "memberForm" 에 비어있는 MemberForm 객체를 넣어준다.
+    // 이유는 validation 같은 것을 해주기 때문에,
+    // members/createMemberForm 이 렌더린 될때 MemberForm object 를 참고해서 렌더링함.
+    // 렌더링 페이지에서 MemberForm object 의 field 를 보고 렌더링함.
     @GetMapping("/members/new")
     public String createFrom(Model model) {
         model.addAttribute("memberForm", new MemberForm());
