@@ -74,18 +74,29 @@ public class ItemController {
     /**
      * 상품 수정
      */
+    // BookFrom 은 controller(web) 계층에서만 사용하도록 전략적으로 셋팅한 상태.
+    // 그래서 service 계층으로 BookFrom 을 넘기는건 지저분하다.
+    // 그래서 대안책이 Book Entity 를 만드는 것였다.
+
+    // 해결책은?
+
     @PostMapping(value = "/items/{itemId}/edit")
-    public String updateItem(@ModelAttribute("form") BookForm form) {
+    public String updateItem(@PathVariable Long itemId, @ModelAttribute("form") BookForm form) {
 
-        Book book = new Book();
-        book.setId(form.getId());
-        book.setName(form.getName());
-        book.setPrice(form.getPrice());
-        book.setStockQuantity(form.getStockQuantity());
-        book.setAuthor(form.getAuthor());
-        book.setIsbn(form.getIsbn());
+//        Book book = new Book();
+//        book.setId(form.getId());
+//        book.setName(form.getName());
+//        book.setPrice(form.getPrice());
+//        book.setStockQuantity(form.getStockQuantity());
+//        book.setAuthor(form.getAuthor());
+//        book.setIsbn(form.getIsbn());
+//        itemService.saveItem(book);
 
-        itemService.saveItem(book);
+        // 해결책은 이것. 어설프게 Entity 안만들고 필요한 데이터만 넘겨준다.
+        // 만약 데이터가 많다면 DTO 를 만드는게 좋음.
+        // ex. UpdateItemDto
+        itemService.updateItem(itemId, form.getName(), form.getPrice(), form.getStockQuantity());
+
         return "redirect:/items";
     }
 
