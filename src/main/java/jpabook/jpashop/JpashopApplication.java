@@ -25,4 +25,5 @@ public class JpashopApplication {
         return hibernate5Module;
     }
 
+
 }
