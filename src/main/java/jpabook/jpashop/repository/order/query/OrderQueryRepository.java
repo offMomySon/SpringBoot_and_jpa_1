@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,5 +55,35 @@ public class OrderQueryRepository {
                 OrderItemQueryDto.class)
                 .setParameter("orderId", orderId)
                 .getResultList();
+    }
+
+    public List<OrderQueryDto> findAllByDto_optimization() {
+        //루트 조회(toOne 코드를 모두 한번에 조회)
+        List<OrderQueryDto> result = findOrders();
+
+        Map<Long, List<OrderItemQueryDto>> orderItemMap = findOrderItemMap(toOrderIds(result));
+
+        result.forEach(o-> o.setOrderItems(orderItemMap.get(o.getOrderId())));
+
+        return result;
+    }
+
+    private Map<Long, List<OrderItemQueryDto>> findOrderItemMap(List<Long> orderIds) {
+        List<OrderItemQueryDto> orderItems = em.createQuery(
+                "select new jpabook.jpashop.repository.order.query.OrderItemQueryDto(oi.order.id, i.name, oi.orderPrice, oi.count)" +
+                        " from OrderItem oi" +
+                        " join oi.item i" +
+                        " where oi.order.id in :orderIds", OrderItemQueryDto.class)
+                .setParameter("orderIds", orderIds)
+                .getResultList();
+
+        return orderItems.stream()
+                .collect(Collectors.groupingBy(orderItemQueryDto -> orderItemQueryDto.getOrderId()));
+    }
+
+    private List<Long> toOrderIds(List<OrderQueryDto> result) {
+        return result.stream()
+                .map(o -> o.getOrderId())
+                .collect(Collectors.toList());
     }
 }
