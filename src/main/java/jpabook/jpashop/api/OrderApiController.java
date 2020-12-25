@@ -44,6 +44,26 @@ public class OrderApiController {
                 .collect(toList());
     }
 
+    // order 에 대해서 뻥튀기가 되는데
+    // 우리가 원하는건 order 가 뻥튀기가 되는 걸 원하지 않는다. (중복되는걸 원하지 않는다.)
+    // 해결법. -> distinct 키워드 사용.
+
+    // 단점. ( 1 대 N 의 단점. )
+    // 페이징 쿼리가 불가함. -> 메모리에서 처리해버림 -> 데이터가 많으면 메모리가 나가버림.
+
+    // 1:N 쿼리를 하는 순간 order 의 기준 자체가 틀어짐. N 기준으로 데이터가 뻥튀기가된다.
+    // 결국 N 기준으로 ordering 이 된다.
+
+    // collection fetch join 은 1개만 사용 가능하다.
+    @GetMapping("/api/v3/orders")
+    public List<OrderDto> ordersV3() {
+        List<Order> orders = orderRepository.findAllWithItem(new OrderSearch());
+
+        return orders.stream()
+                .map(o -> new OrderDto(o))
+                .collect(toList());
+    }
+
     @Data
     static class OrderDto{
         private Long orderId;
