@@ -5,6 +5,8 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryDto;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderSimpleApiController {
     private final OrderRepository orderRepository;
+    private final OrderSimpleQueryRepository orderSimpleQueryRepository;
 
     /**
      * V1. 엔티티 직접 노출
@@ -58,6 +61,15 @@ public class OrderSimpleApiController {
                 .map(SimpleOrderDto::new)
                 .collect(Collectors.toList());
         return result;
+    }
+
+    // 단점. v3 에비해 v4 는 재사용성이 없음.
+    //       코드가 지저분함.
+    // 장점. 성능적으로 조금더 좋음.
+    //       원하는 값을 가져올 수 있음.
+    @GetMapping("/api/v4/simple-orders")
+    public List<OrderSimpleQueryDto> ordersV4() {
+        return orderSimpleQueryRepository.findOrderDtos();
     }
 
     @Data
