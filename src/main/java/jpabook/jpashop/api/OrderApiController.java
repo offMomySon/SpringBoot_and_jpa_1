@@ -8,7 +8,9 @@ import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class OrderApiController {
@@ -50,6 +53,7 @@ public class OrderApiController {
 
     // 단점. ( 1 대 N 의 단점. )
     // 페이징 쿼리가 불가함. -> 메모리에서 처리해버림 -> 데이터가 많으면 메모리가 나가버림.
+    // 데이터 전송량 자체가 많아져 버림.
 
     // 1:N 쿼리를 하는 순간 order 의 기준 자체가 틀어짐. N 기준으로 데이터가 뻥튀기가된다.
     // 결국 N 기준으로 ordering 이 된다.
@@ -63,6 +67,31 @@ public class OrderApiController {
                 .map(o -> new OrderDto(o))
                 .collect(toList());
     }
+
+    // default_batch_fetch_size: 100 을 설정하면,
+    // in query 한방으로 100 개를 모두 가져오는 것.
+
+    // collection 에 가져온 order 들을 보고,
+    // 필요한 OrderItem 들을 미리 in query 로 다 가져온다.
+    // 결국 1 : N : M 이 -> 1 : 1 : 1 의 관계 처럼 sql 이 나가게 된다.
+    // 데이터가 너무 많으면 또 다르게 변경될 수 있다.
+
+    // v3 에 비해
+    @GetMapping("/api/v3.1/orders")
+    public List<OrderDto> ordersV3_page(
+            @RequestParam(value="offest", defaultValue = "0") int offset,
+            @RequestParam(value="limit", defaultValue = "100") int limit) {
+
+        log.info("offset = "+offset);
+        log.info("limit = "+limit);
+
+        List<Order> orders = orderRepository.findAllWithMemberDelivery(offset,limit);
+
+        return orders.stream()
+                .map(o -> new OrderDto(o))
+                .collect(toList());
+    }
+
 
     @Data
     static class OrderDto{
