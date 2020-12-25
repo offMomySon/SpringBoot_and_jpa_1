@@ -12,6 +12,8 @@ public class OrderSimpleQueryRepository {
 
     private final EntityManager em;
 
+    // 이런 specific 한 query 는 따로 repository 와 Dto class 를 분리 시켜주는 것이 좋다.
+    // 특정화면에 특정적인 것들. 즉, 핵심 비지니스 로직이 아닌것들.
     // 사실상 api 스펙이 repository 에 들어와 있는 것.
     public List<OrderSimpleQueryDto> findOrderDtos() {
         return em.createQuery(
